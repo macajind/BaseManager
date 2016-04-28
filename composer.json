@@ -1,0 +1,29 @@
+{
+	"name": "macajind/crud-manager",
+	"description": "CRUDManager",
+	"type": "library",
+	"license": "BSD-3-Clause",
+	"require": {
+		"php": ">= 5.4",
+		"nette/bootstrap": "^2.3",
+		"nette/database": "^2.3",
+		"nette/di": "^2.3",
+		"nette/robot-loader": "^2.3",
+		"nette/utils": "^2.3"
+	},
+	"require-dev": {
+		"nette/tester": "^1.6",
+		"tracy/tracy": "^2.3",
+		"janmarek/mockista": "^1.1"
+	},
+	"autoload": {
+		"classmap": [
+			"src/"
+		]
+	},
+	"autoload-dev": {
+		"classmap": [
+			"tests/"
+		]
+	}
+}
