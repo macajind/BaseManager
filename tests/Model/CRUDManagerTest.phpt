@@ -338,6 +338,24 @@ class CRUDManagerTest extends MockTestCase
 		$this->testManager->removeTest($id);
 		Assert::false($this->database->table($this->getTableName(TestManager::class))->get($id));
 	}
+
+	/** */
+	public function testRegisterMethods()
+	{
+		$this->testManager->registerMethods('test', function () {
+			return 'Test method was called!';
+		});
+		Assert::equal('Test method was called!', $this->testManager->test());
+	}
+
+	/** */
+	public function testRegisterMethodsWithArgs()
+	{
+		$this->testManager->registerMethods('test', function ($arg) {
+			return "Test method was called with argument \"$arg\"!";
+		});
+		Assert::equal('Test method was called with argument "test"!', $this->testManager->test('test'));
+	}
 }
 
 $testCase = new CRUDManagerTest();
