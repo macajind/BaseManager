@@ -7,29 +7,31 @@ use Nette\Database\Table\Selection;
 use Nette\Object;
 use Nette\UnexpectedValueException;
 
-// TODO: Finish comments in whole class.
-
 /**
- * Class CRUDManager
+ * Class CRUDManager which brings CRUD operations to other inherited model classes using Nette Database library.
  * @author Jindřich Máca
  */
 abstract class CRUDManager extends Object
 {
-	/**  */
+	/** Naming pattern for classes to map on database tables. */
 	const TABLE_NAME_PATTERN = "/(?P<name>\w+)Manager$/";
 
-	/** @var Context */
+	/** @var Context Nette database context. */
 	private $database;
 
-	/** @var string */
+	/** @var string Name of the database table represented by class. */
 	private $tableName;
 
-	/** @var null|array */
+	/** @var null|array Array of all known tables or null. */
 	public static $tables = null;
 
 	/**
-	 * More effective than asking directly for every database table.
-	 * @return bool
+	 * Checks if table represented by class exists in database.
+	 *
+	 * Static approach for loading all database tables only once should be more effective than asking directly for
+	 * every database table.
+	 *
+	 * @return bool Indicates if database table exists.
 	 */
 	private function tableExists()
 	{
@@ -39,9 +41,11 @@ abstract class CRUDManager extends Object
 
 	/**
 	 * CRUDManager constructor.
-	 * @param Context $database
-	 * @throws UnexpectedValueException
-	 * @throws OutOfBoundsException
+	 *
+	 * @param Context $database Nette database context.
+	 *
+	 * @throws UnexpectedValueException If class name does not match the pattern for database table recognition.
+	 * @throws OutOfBoundsException If database table represented by class does not exists.
 	 */
 	public function __construct(Context $database)
 	{
@@ -54,8 +58,8 @@ abstract class CRUDManager extends Object
 	}
 
 	/**
-	 *
-	 * @return string
+	 * Returns name of the database table represented by class.
+	 * @return string Table name.
 	 */
 	public final function getTableName()
 	{
@@ -63,8 +67,9 @@ abstract class CRUDManager extends Object
 	}
 
 	/**
-	 *
-	 * @param string $tableName
+	 * Sets name of the database table represented by class.
+	 * @param string $tableName New table name.
+	 * @return void
 	 */
 	protected function setTableName($tableName)
 	{
@@ -72,8 +77,9 @@ abstract class CRUDManager extends Object
 	}
 
 	/**
-	 *
-	 * @return Selection
+	 * Returns Nette filtered table representation.
+	 * @return Selection Filtered table representation.
+	 * @see Selection
 	 */
 	protected final function getTable()
 	{
@@ -81,11 +87,14 @@ abstract class CRUDManager extends Object
 	}
 
 	/**
+	 * Returns Nette filtered table representation of m:n decomposition database table.
 	 *
-	 * @param CRUDManager $relatedTable
-	 * @param bool        $relatedFirst
-	 * @param string      $delimiter
-	 * @return Selection
+	 * @param CRUDManager $relatedTable Related table.
+	 * @param bool        $relatedFirst Determinate order of the relation (default is related first).
+	 * @param string      $delimiter    Delimiter in decomposition database table name.
+	 *
+	 * @return Selection Filtered table representation.
+	 * @see Selection
 	 */
 	protected final function getTableRelation(CRUDManager $relatedTable, $relatedFirst = false, $delimiter = '_')
 	{
@@ -95,9 +104,11 @@ abstract class CRUDManager extends Object
 	}
 
 	/**
-	 *
-	 * @param mixed $id
-	 * @return false|IRow
+	 * Returns row specified by given primary key from database table.
+	 * @param mixed $id Primary key.
+	 * @return false|IRow Row specified by primary key or false if there is no such row.
+	 * @see IRow
+	 * @see \Nette\Database\Table\ActiveRow
 	 */
 	public function getById($id)
 	{
@@ -105,8 +116,9 @@ abstract class CRUDManager extends Object
 	}
 
 	/**
-	 *
-	 * @return Selection
+	 * Returns Nette filtered table representation.
+	 * @return Selection Filtered table representation.
+	 * @see Selection
 	 */
 	public function getAll()
 	{
@@ -114,9 +126,16 @@ abstract class CRUDManager extends Object
 	}
 
 	/**
+	 * Inserts row into the database table.
 	 *
-	 * @param array|Selection|Traversable $record
-	 * @return bool|int|IRow
+	 * @param array|Selection|Traversable $record Record data to be inserted.
+	 *
+	 * @return bool|int|IRow Returns IRow or number of affected rows for Selection or table without primary key.
+	 *
+	 * @see Selection
+	 * @see Traversable
+	 * @see IRow
+	 * @see \Nette\Database\Table\ActiveRow
 	 */
 	public function add($record)
 	{
@@ -124,10 +143,11 @@ abstract class CRUDManager extends Object
 	}
 
 	/**
-	 *
-	 * @param mixed             $id
-	 * @param array|Traversable $record
-	 * @return int
+	 * Updates row in the database table specified by given primary key.
+	 * @param mixed             $id     Primary key.
+	 * @param array|Traversable $record New record data to be updated.
+	 * @return int Number of affected rows.
+	 * @see Traversable
 	 */
 	public function update($id, $record)
 	{
@@ -135,16 +155,28 @@ abstract class CRUDManager extends Object
 	}
 
 	/**
-	 *
-	 * @param mixed $id
-	 * @return int
+	 * Deletes all rows in the database table specified by given primary key.
+	 * @param mixed $id Primary key.
+	 * @return int Number of affected rows.
 	 */
 	public function remove($id)
 	{
 		return $this->getTable()->wherePrimary($id)->delete();
 	}
 
-	/** @inheritdoc */
+	/**
+	 * Call to undefined method.
+	 *
+	 * Allows to call all table manipulation methods also with the name of the table.
+	 * For example: TestManager->addTest(...) => TestManager->add(...)
+	 *
+	 * @param string $name      Method's name.
+	 * @param array  $arguments Method's arguments.
+	 *
+	 * @return mixed Return value of the method.
+	 *
+	 * @throws Nette\MemberAccessException If accessing of the method fails.
+	 */
 	public function __call($name, $arguments)
 	{
 		$methodName = ucfirst($this->getTableName());

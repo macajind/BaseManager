@@ -7,10 +7,8 @@ use Tester\TestCase;
 
 require_once 'bootstrap.php';
 
-// TODO: Finish comments in whole class.
-
 /**
- * Class InflectTest
+ * Class InflectTest.
  * @package CRUDManager
  * @author  Jindřich Máca
  * @testCase
@@ -25,23 +23,13 @@ class InflectTest extends TestCase
 		];
 	}
 
-	/**
-	 *
-	 * @param string $singular
-	 * @param string $plural
-	 * @dataProvider getWords
-	 */
+	/** @dataProvider getWords */
 	public function testPluralize($singular, $plural)
 	{
 		Assert::same($plural, Inflect::pluralize($singular));
 	}
 
-	/**
-	 *
-	 * @param string $singular
-	 * @param string $plural
-	 * @dataProvider getWords
-	 */
+	/** @dataProvider getWords */
 	public function testSingularize($singular, $plural)
 	{
 		Assert::same($singular, Inflect::singularize($plural));
@@ -55,13 +43,7 @@ class InflectTest extends TestCase
 		];
 	}
 
-	/**
-	 *
-	 * @param int    $count
-	 * @param string $word
-	 * @param string $expression
-	 * @dataProvider getExpressions
-	 */
+	/** @dataProvider getExpressions */
 	public function testIfPluralize($count, $word, $expression)
 	{
 		Assert::same($expression, Inflect::pluralize_if($count, $word));
