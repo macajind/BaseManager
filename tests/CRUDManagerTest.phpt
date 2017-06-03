@@ -41,8 +41,9 @@ class CRUDManagerTest extends MockTestCase
 		$this->selection = $this->mockista->create('Nette\Database\Table\Selection');
 		$builder = $this->mockista->createBuilder('Nette\Database\Context', [
 			'table' => function ($table) {
-				if ($table == 'test') return $this->selection;
-				else return $this->selection->expects('get')->andReturn(false);
+				return $table !== 'test'
+					? $this->selection->expects('get')->andReturn(false)
+					: $this->selection;
 			},
 			'getStructure' => $this->mockista->create('Nette\Database\IStructure', [
 				'getTables' => [
@@ -61,7 +62,7 @@ class CRUDManagerTest extends MockTestCase
 	 */
 	private function getTableName($className)
 	{
-		$matches = array();
+		$matches = [];
 		if (preg_match('/(?P<name>\w+)Manager$/', $className, $matches) === 1)
 			return strtolower($matches['name']);
 		else return false;
@@ -73,7 +74,7 @@ class CRUDManagerTest extends MockTestCase
 		$tableName = $this->getTableName(WrongManager::class);
 		Assert::exception(function () {
 			new WrongManager($this->database);
-		}, 'OutOfBoundsException', "Table with name '$tableName' does not exist");
+		}, 'OutOfBoundsException', "Table with name '$tableName' does not exist!");
 	}
 
 	/**  */
@@ -82,7 +83,7 @@ class CRUDManagerTest extends MockTestCase
 		Assert::exception(function () {
 			new BaseManagerDummy($this->database);
 		}, 'Nette\UnexpectedValueException',
-			"Class name '" . BaseManagerDummy::class . "' does not match the pattern '" . CRUDManager::TABLE_NAME_PATTERN . "' for database table recognition"
+			"Class name '" . BaseManagerDummy::class . "' does not match the pattern '" . CRUDManager::TABLE_NAME_PATTERN . "' for database table recognition!"
 		);
 	}
 

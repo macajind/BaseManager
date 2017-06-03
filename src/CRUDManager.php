@@ -30,7 +30,7 @@ abstract class CRUDManager extends Object
 	public static $tables = null;
 
 	/** @var callable[] */
-	private $methods = array();
+	private $methods = [];
 
 	/**
 	 * More effective than asking directly for every database table.
@@ -52,10 +52,10 @@ abstract class CRUDManager extends Object
 	{
 		$this->database = $database;
 		$className = $this->getReflection()->getName();
-		$matches = array();
+		$matches = [];
 		if (preg_match(static::TABLE_NAME_PATTERN, $className, $matches) === 1) $this->setTableName($matches['name']);
-		else throw new UnexpectedValueException("Class name '{$className}' does not match the pattern '" . self::TABLE_NAME_PATTERN . "' for database table recognition");
-		if (!$this->tableExists()) throw new OutOfBoundsException("Table with name '{$this->getTableName()}' does not exist");
+		else throw new UnexpectedValueException("Class name '{$className}' does not match the pattern '" . self::TABLE_NAME_PATTERN . "' for database table recognition!");
+		if (!$this->tableExists()) throw new OutOfBoundsException("Table with name '{$this->getTableName()}' does not exist!");
 	}
 
 	/**
@@ -95,8 +95,9 @@ abstract class CRUDManager extends Object
 	 */
 	protected final function getTableRelation(CRUDManager $relatedTable, $relatedFirst = false, $delimiter = '_')
 	{
-		if ($relatedFirst) return $this->database->table($relatedTable->getTableName() . $delimiter . $this->getTableName());
-		else return $this->database->table($this->getTableName() . $delimiter . $relatedTable->getTableName());
+		return $relatedFirst
+			? $this->database->table($relatedTable->getTableName() . $delimiter . $this->getTableName())
+			: $this->database->table($this->getTableName() . $delimiter . $relatedTable->getTableName());
 	}
 
 	/**
@@ -189,7 +190,7 @@ abstract class CRUDManager extends Object
 			case "get{$methodName}ById":
 				return $this->getById($arguments[0]);
 				break;
-			case "getAll" . Inflect::pluralize($methodName):
+			case 'getAll' . Inflect::pluralize($methodName):
 				return $this->getAll();
 				break;
 			case "add{$methodName}":
@@ -202,8 +203,9 @@ abstract class CRUDManager extends Object
 				return $this->remove($arguments[0]);
 				break;
 			default:
-				if ($this->methodExists($name)) return $this->callMethod($name, $arguments);
-				return parent::__call($name, $arguments);
+				return $this->methodExists($name)
+					? $this->callMethod($name, $arguments)
+					: parent::__call($name, $arguments);
 		}
 	}
 }

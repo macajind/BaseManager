@@ -59,7 +59,7 @@ namespace CRUDManager;
 
 class Inflect
 {
-	static $plural = array(
+	static $plural = [
 		'/(quiz)$/i' => "$1zes",
 		'/^(ox)$/i' => "$1en",
 		'/([m|l])ouse$/i' => "$1ice",
@@ -79,9 +79,9 @@ class Inflect
 		'/(us)$/i' => "$1es",
 		'/s$/i' => "s",
 		'/$/' => "s"
-	);
+	];
 
-	static $singular = array(
+	static $singular = [
 		'/(quiz)zes$/i' => "$1",
 		'/(matr)ices$/i' => "$1ix",
 		'/(vert|ind)ices$/i' => "$1ex",
@@ -110,9 +110,9 @@ class Inflect
 		'/(corpse)s$/i' => "$1",
 		'/(us)es$/i' => "$1",
 		'/s$/i' => ""
-	);
+	];
 
-	static $irregular = array(
+	static $irregular = [
 		'move' => 'moves',
 		'foot' => 'feet',
 		'goose' => 'geese',
@@ -122,9 +122,9 @@ class Inflect
 		'tooth' => 'teeth',
 		'person' => 'people',
 		'valve' => 'valves'
-	);
+	];
 
-	static $uncountable = array(
+	static $uncountable = [
 		'sheep',
 		'fish',
 		'deer',
@@ -134,7 +134,7 @@ class Inflect
 		'rice',
 		'information',
 		'equipment'
-	);
+	];
 
 	public static function pluralize($string)
 	{
