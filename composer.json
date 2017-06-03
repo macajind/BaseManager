@@ -1,0 +1,32 @@
+{
+	"name": "macajind/crud-manager",
+	"description": "Class which brings CRUD operations to other inherited model classes using Nette Database library.",
+	"homepage": "https://github.com/macajind/crud-manager",
+	"authors": [
+		{
+			"name": "Jindřich Máca",
+			"homepage": "https://github.com/macajind"
+		}
+	],
+	"type": "library",
+	"license": "BSD-3-Clause",
+	"require": {
+		"php": ">= 5.4",
+		"nette/database": "^2.3",
+		"nette/utils": "^2.3"
+	},
+	"require-dev": {
+		"nette/tester": "^1.6",
+		"janmarek/mockista": "^1.1"
+	},
+	"autoload": {
+		"classmap": [
+			"src/"
+		]
+	},
+	"autoload-dev": {
+		"classmap": [
+			"tests/"
+		]
+	}
+}
