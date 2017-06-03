@@ -6,8 +6,6 @@ use Nette\Database\Table\IRow;
 use Nette\Database\Table\Selection;
 use Nette\Object;
 use Nette\UnexpectedValueException;
-use Nette\Utils\AssertionException;
-use Nette\Utils\Callback;
 
 // TODO: Finish comments in whole class.
 
@@ -28,9 +26,6 @@ abstract class CRUDManager extends Object
 
 	/** @var null|array */
 	public static $tables = null;
-
-	/** @var callable[] */
-	private $methods = [];
 
 	/**
 	 * More effective than asking directly for every database table.
@@ -91,7 +86,6 @@ abstract class CRUDManager extends Object
 	 * @param bool        $relatedFirst
 	 * @param string      $delimiter
 	 * @return Selection
-	 * @throws AssertionException
 	 */
 	protected final function getTableRelation(CRUDManager $relatedTable, $relatedFirst = false, $delimiter = '_')
 	{
@@ -150,38 +144,6 @@ abstract class CRUDManager extends Object
 		return $this->getTable()->wherePrimary($id)->delete();
 	}
 
-	/**
-	 *
-	 * @param string   $name
-	 * @param callable $method
-	 */
-	public final function registerMethods($name, callable $method)
-	{
-		$this->methods[$name] = $method;
-	}
-
-	/**
-	 *
-	 * @param string $name
-	 * @return bool
-	 */
-	private function methodExists($name)
-	{
-		return array_key_exists($name, $this->methods);
-	}
-
-	/**
-	 *
-	 * @param string $name
-	 * @param array  $args
-	 * @return mixed
-	 */
-	private function callMethod($name, $args)
-	{
-		$method = $this->methods[$name];
-		return Callback::invokeArgs($method, $args);
-	}
-
 	/** @inheritdoc */
 	public function __call($name, $arguments)
 	{
@@ -203,9 +165,7 @@ abstract class CRUDManager extends Object
 				return $this->remove($arguments[0]);
 				break;
 			default:
-				return $this->methodExists($name)
-					? $this->callMethod($name, $arguments)
-					: parent::__call($name, $arguments);
+				return parent::__call($name, $arguments);
 		}
 	}
 }
