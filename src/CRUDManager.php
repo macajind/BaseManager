@@ -1,7 +1,6 @@
 <?php
 
-namespace Nette\Model;
-
+use CRUDManager\Inflect;
 use Nette\Database\Context;
 use Nette\Database\Table\IRow;
 use Nette\Database\Table\Selection;
@@ -9,8 +8,6 @@ use Nette\Object;
 use Nette\UnexpectedValueException;
 use Nette\Utils\AssertionException;
 use Nette\Utils\Callback;
-use OutOfBoundsException;
-use Traversable;
 
 // TODO: Finish comments in whole class.
 

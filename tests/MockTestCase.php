@@ -1,6 +1,6 @@
 <?php
 
-namespace Nette\Model;
+namespace CRUDManager;
 
 use Mockista\Registry;
 use Tester\TestCase;

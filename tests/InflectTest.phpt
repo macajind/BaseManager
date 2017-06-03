@@ -1,11 +1,11 @@
 <?php
 
-namespace Nette\Model;
+namespace CRUDManager;
 
 use Tester\Assert;
 use Tester\TestCase;
 
-require_once '../bootstrap.php';
+require_once 'bootstrap.php';
 
 // TODO: Finish comments in whole class.
 

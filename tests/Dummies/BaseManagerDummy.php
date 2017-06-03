@@ -1,6 +1,8 @@
 <?php
 
-namespace Nette\Model;
+namespace CRUDManager\Dummies;
+
+use CRUDManager;
 
 /**
  * Class BaseManagerDummy

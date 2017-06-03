@@ -1,14 +1,18 @@
 <?php
 
-namespace Nette\Model;
+namespace CRUDManager;
 
+use CRUDManager;
+use CRUDManager\Dummies\BaseManagerDummy;
+use CRUDManager\Dummies\TestManager;
+use CRUDManager\Dummies\WrongManager;
 use Mockista\Mock;
 use Nette\Database\Context;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\Selection;
 use Tester\Assert;
 
-require_once '../bootstrap.php';
+require_once 'bootstrap.php';
 
 // TODO: Finish comments in whole class.
 
