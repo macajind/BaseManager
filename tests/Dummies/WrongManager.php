@@ -5,8 +5,9 @@ namespace CRUDManager\Dummies;
 use CRUDManager;
 
 /**
- * Testing class without database table.
- * @package App\Model
+ * Class WrongManager
+ * @package CRUDManager\Dummies
+ * @author  Jindřich Máca
  */
 class WrongManager extends CRUDManager
 {

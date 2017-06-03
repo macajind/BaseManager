@@ -6,7 +6,8 @@ use CRUDManager;
 
 /**
  * Class BaseManagerDummy
- * @package App\Model
+ * @package CRUDManager\Dummies
+ * @author  Jindřich Máca
  */
 class BaseManagerDummy extends CRUDManager
 {

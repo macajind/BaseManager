@@ -12,8 +12,8 @@ use Nette\Utils\Callback;
 // TODO: Finish comments in whole class.
 
 /**
- * Class CRUDManager.
- * @package App\Model
+ * Class CRUDManager
+ * @author Jindřich Máca
  */
 abstract class CRUDManager extends Object
 {

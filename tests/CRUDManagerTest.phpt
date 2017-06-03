@@ -17,8 +17,9 @@ require_once 'bootstrap.php';
 // TODO: Finish comments in whole class.
 
 /**
- * Class CRUDManagerTest.
- * @package App\Model
+ * Class CRUDManagerTest
+ * @package CRUDManager
+ * @author  Jindřich Máca
  * @testCase
  */
 class CRUDManagerTest extends MockTestCase

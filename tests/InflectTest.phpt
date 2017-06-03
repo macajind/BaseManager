@@ -10,8 +10,9 @@ require_once 'bootstrap.php';
 // TODO: Finish comments in whole class.
 
 /**
- * Class InflectTest.
- * @package App\Utils
+ * Class InflectTest
+ * @package CRUDManager
+ * @author  Jindřich Máca
  * @testCase
  */
 class InflectTest extends TestCase

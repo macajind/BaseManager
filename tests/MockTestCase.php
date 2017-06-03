@@ -8,8 +8,9 @@ use Tester\TestCase;
 // TODO: Finish comments in whole class.
 
 /**
- * Class MockTestCase.
- * @package Nette\Model
+ * Class MockTestCase
+ * @package CRUDManager
+ * @author  Jindřich Máca
  */
 abstract class MockTestCase extends TestCase
 {
