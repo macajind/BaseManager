@@ -17,13 +17,13 @@ abstract class CRUDManager extends Object
 	const TABLE_NAME_PATTERN = "/(?P<name>\w+)Manager$/";
 
 	/** @var Context Nette database context. */
-	private $database;
+	protected $database;
 
 	/** @var string Name of the database table represented by class. */
 	private $tableName;
 
 	/** @var null|array Array of all known tables or null. */
-	public static $tables = null;
+	private static $tables = null;
 
 	/**
 	 * Checks if table represented by class exists in database.
@@ -112,7 +112,7 @@ abstract class CRUDManager extends Object
 	 */
 	public function getById($id)
 	{
-		return $this->getTable()->get($id);
+		return $this->getAll()->get($id);
 	}
 
 	/**
