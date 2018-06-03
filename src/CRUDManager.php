@@ -52,7 +52,7 @@ abstract class CRUDManager
 	public function __construct(Context $database)
 	{
 		$this->database = $database;
-		$className = $this->getReflection()->getName();
+		$className = static::class;
 		$matches = [];
 		if (preg_match(static::TABLE_NAME_PATTERN, $className, $matches) === 1) $this->setTableName($matches['name']);
 		else throw new UnexpectedValueException("Class name '{$className}' does not match the pattern '" . self::TABLE_NAME_PATTERN . "' for database table recognition!");
