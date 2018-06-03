@@ -4,15 +4,17 @@ use CRUDManager\Inflect;
 use Nette\Database\Context;
 use Nette\Database\Table\IRow;
 use Nette\Database\Table\Selection;
-use Nette\Object;
+use Nette\SmartObject;
 use Nette\UnexpectedValueException;
 
 /**
  * Class CRUDManager which brings CRUD operations to other inherited model classes using Nette Database library.
  * @author Jindřich Máca
  */
-abstract class CRUDManager extends Object
+abstract class CRUDManager
 {
+	use SmartObject;
+
 	/** Naming pattern for classes to map on database tables. */
 	const TABLE_NAME_PATTERN = "/(?P<name>\w+)Manager$/";
 
