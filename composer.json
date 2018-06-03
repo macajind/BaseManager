@@ -11,12 +11,12 @@
 	"type": "library",
 	"license": "BSD-3-Clause",
 	"require": {
-		"php": ">= 5.4",
-		"nette/database": "^2.3",
-		"nette/utils": "^2.3"
+		"php": ">=7.1.0",
+		"nette/database": "^2.4",
+		"nette/utils": "^2.4"
 	},
 	"require-dev": {
-		"nette/tester": "^1.6",
+		"nette/tester": "^2.0",
 		"janmarek/mockista": "^1.1"
 	},
 	"autoload": {
@@ -28,5 +28,10 @@
 		"classmap": [
 			"tests/"
 		]
+	},
+	"config": {
+		"platform": {
+			"php": "7.1"
+		}
 	}
 }
