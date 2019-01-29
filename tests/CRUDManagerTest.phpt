@@ -6,9 +6,8 @@ use CRUDManager;
 use CRUDManager\Dummies\BaseManagerDummy;
 use CRUDManager\Dummies\TestManager;
 use CRUDManager\Dummies\WrongManager;
-use Mockista\Mock;
+use Mockery;
 use Nette\Database\Context;
-use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\Selection;
 use Tester\Assert;
 
@@ -20,7 +19,7 @@ require_once 'bootstrap.php';
  * @author  Jindřich Máca
  * @testCase
  */
-class CRUDManagerTest extends MockTestCase
+final class CRUDManagerTest extends MockTestCase
 {
 	/** @var TestManager */
 	private $testManager = null;
@@ -28,31 +27,25 @@ class CRUDManagerTest extends MockTestCase
 	/** @var Context */
 	private $database;
 
-	/** @var Mock */
+	/** @var Mockery\MockInterface */
 	private $selection;
 
 	/** @inheritdoc */
 	protected function setUp()
 	{
 		parent::setUp();
-		$this->selection = $this->mockista->create('Nette\Database\Table\Selection');
-		$builder = $this->mockista->createBuilder('Nette\Database\Context', [
-			'table' => function ($table) {
-				return $table !== 'test'
-					? $this->selection->expects('get')->andReturn(false)
-					: $this->selection;
-			},
-			'getStructure' => $this->mockista->create('Nette\Database\IStructure', [
-				'getTables' => [
-					['name' => 'test']
-				]
-			])
-		]);
-		$this->database = $builder->getMock();
+		$this->selection = Mockery::mock('\Nette\Database\Table\Selection');
+		$this->database = Mockery::mock('\Nette\Database\Context');
+		$this->database->shouldReceive('table')->andReturnUsing(function ($table) {
+			return $table !== 'test'
+				? $this->selection->expects('get')->andReturn(false)->getMock()
+				: $this->selection;
+		});
+		$this->database->shouldReceive('getStructure->getTables')->andReturn([['name' => 'test']]);
 		$this->testManager = new TestManager($this->database);
 	}
 
-	private function getTableName($className)
+	private function getTableName(string $className)
 	{
 		$matches = [];
 		if (preg_match('/(?P<name>\w+)Manager$/', $className, $matches) === 1)
@@ -60,35 +53,37 @@ class CRUDManagerTest extends MockTestCase
 		else return false;
 	}
 
-	public function testCreatingClassWithNonExistingTable()
+	public function testCreatingClassWithNonExistingTable(): void
 	{
 		$tableName = $this->getTableName(WrongManager::class);
-		Assert::exception(function () {
-			new WrongManager($this->database);
-		}, 'OutOfBoundsException', "Table with name '$tableName' does not exist!");
+		Assert::exception(
+			function () { new WrongManager($this->database); },
+			'OutOfBoundsException',
+			"Table with name '$tableName' does not exist!"
+		);
 	}
 
-	public function testCreatingClassWithWrongNamePattern()
+	public function testCreatingClassWithWrongNamePattern(): void
 	{
-		Assert::exception(function () {
-			new BaseManagerDummy($this->database);
-		}, 'Nette\UnexpectedValueException',
+		Assert::exception(
+			function () { new BaseManagerDummy($this->database); },
+			'Nette\UnexpectedValueException',
 			"Class name '" . BaseManagerDummy::class . "' does not match the pattern '" . CRUDManager::TABLE_NAME_PATTERN . "' for database table recognition!"
 		);
 	}
 
-	public function testGetTableName()
+	public function testGetTableName(): void
 	{
 		Assert::same($this->getTableName(TestManager::class), $this->testManager->getTableName());
 	}
 
-	private function mockSelectionGet($id, $name = null)
+	private function mockSelectionGet(int $id, string $name = null): void
 	{
 		if (is_null($name)) $this->selection->expects('get')->with($id)->andReturn(false);
 		else $this->selection->expects('get')->with($id)->andReturn(['name' => $name]);
 	}
 
-	protected function getTestRecords()
+	protected function getTestRecords(): array
 	{
 		return [
 			[1, 'test'],
@@ -98,42 +93,40 @@ class CRUDManagerTest extends MockTestCase
 	}
 
 	/** @dataProvider getTestRecords */
-	public function testGeneralGetByIdWhenIdExists($id, $name)
+	public function testGeneralGetByIdWhenIdExists(int $id, string $name): void
 	{
 		$this->mockSelectionGet($id, $name);
 		$row = $this->testManager->getById($id);
 		Assert::same($name, $row['name']);
 	}
 
-	public function testGeneralGetByIdWhenIdNotExists()
+	public function testGeneralGetByIdWhenIdNotExists(): void
 	{
-		$empty = '';
-		$this->mockSelectionGet($empty);
-		Assert::false($this->testManager->getById($empty));
+		$this->mockSelectionGet(0);
+		Assert::false($this->testManager->getById(0));
 	}
 
 	/** @dataProvider getTestRecords */
-	public function testSpecificGetByIdWhenIdExists($id, $name)
+	public function testSpecificGetByIdWhenIdExists(int $id, string $name): void
 	{
 		$this->mockSelectionGet($id, $name);
 		$row = $this->testManager->getTestById($id);
 		Assert::same($name, $row['name']);
 	}
 
-	public function testSpecificGetByIdWhenIdNotExists()
+	public function testSpecificGetByIdWhenIdNotExists(): void
 	{
-		$empty = '';
-		$this->mockSelectionGet($empty);
-		Assert::false($this->testManager->getTestById($empty));
+		$this->mockSelectionGet(0);
+		Assert::false($this->testManager->getTestById(0));
 	}
 
-	private function controlValuesInSelection(Selection $selection)
+	private function controlValuesInSelection(Selection $selection): void
 	{
 		$testRecords = $this->getTestRecords();
 		$count = count($testRecords);
 		$this->selection->expects('count')->andReturn($count);
 		Assert::same($count, $selection->count());
-		for ($i = 0; $i < $selection->count(); $i++) {
+		for ($i = 0; $i < $count; $i++) {
 			$this->selection->expects('fetch')->andReturn(['id' => $testRecords[$i][0], 'name' => $testRecords[$i][1]]);
 			$row = $selection->fetch();
 			Assert::same($testRecords[$i][0], $row['id']);
@@ -141,29 +134,29 @@ class CRUDManagerTest extends MockTestCase
 		}
 	}
 
-	public function testGeneralGetAll()
+	public function testGeneralGetAll(): void
 	{
 		$this->controlValuesInSelection($this->testManager->getAll());
 	}
 
-	public function testSpecificGetAll()
+	public function testSpecificGetAll(): void
 	{
 		$this->controlValuesInSelection($this->testManager->getAllTests());
 	}
 
-	private function validateData($id, $name)
+	private function validateData(int $id, string $name): void
 	{
 		$row = $this->database->table($this->getTableName(TestManager::class))->get($id);
 		Assert::same($name, $row['name']);
 	}
 
-	private function mockSelectionInsert($id, $name)
+	private function mockSelectionInsert(int $id, string $name): void
 	{
 		$this->selection->expects('insert')->with(['id' => $id, 'name' => $name]);
 		$this->mockSelectionGet($id, $name);
 	}
 
-	protected function getInsertionRecords()
+	protected function getInsertionRecords(): array
 	{
 		return [
 			[4, 'test4'],
@@ -172,7 +165,7 @@ class CRUDManagerTest extends MockTestCase
 	}
 
 	/** @dataProvider getInsertionRecords */
-	public function testGeneralAdd($id, $name)
+	public function testGeneralAdd(int $id, string $name): void
 	{
 		$this->mockSelectionInsert($id, $name);
 		$this->testManager->add(['id' => $id, 'name' => $name]);
@@ -181,26 +174,26 @@ class CRUDManagerTest extends MockTestCase
 	}
 
 	/** @dataProvider getInsertionRecords */
-	public function testSpecificAdd($id, $name)
+	public function testSpecificAdd(int $id, string $name): void
 	{
 		$this->mockSelectionInsert($id, $name);
 		$this->testManager->addTest(['id' => $id, 'name' => $name]);
 		$this->validateData($id, $name);
 	}
 
-	private function mockSelectionWherePrimary($id)
+	private function mockSelectionWherePrimary(int $id): void
 	{
 		$this->selection->expects('wherePrimary')->with($id)->andReturn($this->selection);
 	}
 
-	private function mockSelectionUpdate($id, $name)
+	private function mockSelectionUpdate(int $id, string $name): void
 	{
 		$this->mockSelectionWherePrimary($id);
-		$this->selection->expects('update')->with(['name' => $name]);
+		$this->selection->expects('update')->with(['name' => $name])->andReturn(1);
 		$this->mockSelectionGet($id, $name);
 	}
 
-	protected function getUpdatingRecords()
+	protected function getUpdatingRecords(): array
 	{
 		return [
 			[1, 'test4'],
@@ -209,7 +202,7 @@ class CRUDManagerTest extends MockTestCase
 	}
 
 	/** @dataProvider getUpdatingRecords */
-	public function testGeneralUpdate($id, $name)
+	public function testGeneralUpdate(int $id, string $name): void
 	{
 		$this->mockSelectionUpdate($id, $name);
 		$this->testManager->update($id, ['name' => $name]);
@@ -217,21 +210,21 @@ class CRUDManagerTest extends MockTestCase
 	}
 
 	/** @dataProvider getUpdatingRecords */
-	public function testSpecificUpdate($id, $name)
+	public function testSpecificUpdate(int $id, string $name): void
 	{
 		$this->mockSelectionUpdate($id, $name);
 		$this->testManager->updateTest($id, ['name' => $name]);
 		$this->validateData($id, $name);
 	}
 
-	private function mockSelectionDelete($id)
+	private function mockSelectionDelete(int $id): void
 	{
 		$this->mockSelectionWherePrimary($id);
-		$this->selection->expects('delete');
+		$this->selection->expects('delete')->andReturn(1);
 		$this->mockSelectionGet($id);
 	}
 
-	protected function getRemovingRecords()
+	protected function getRemovingRecords(): array
 	{
 		return [
 			[1],
@@ -240,7 +233,7 @@ class CRUDManagerTest extends MockTestCase
 	}
 
 	/** @dataProvider getRemovingRecords */
-	public function testGeneralRemove($id)
+	public function testGeneralRemove(int $id): void
 	{
 		$this->mockSelectionDelete($id);
 		$this->testManager->remove($id);
@@ -248,7 +241,7 @@ class CRUDManagerTest extends MockTestCase
 	}
 
 	/** @dataProvider getRemovingRecords */
-	public function testSpecifiedRemove($id)
+	public function testSpecifiedRemove(int $id): void
 	{
 		$this->mockSelectionDelete($id);
 		$this->testManager->removeTest($id);

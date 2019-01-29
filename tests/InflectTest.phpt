@@ -13,7 +13,7 @@ require_once 'bootstrap.php';
  * @author  Jindřich Máca
  * @testCase
  */
-class InflectTest extends TestCase
+final class InflectTest extends TestCase
 {
 	protected function getWords()
 	{
