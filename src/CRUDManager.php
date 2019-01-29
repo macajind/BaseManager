@@ -2,18 +2,20 @@
 
 use CRUDManager\Inflect;
 use Nette\Database\Context;
-use Nette\Database\Table\IRow;
+use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\Selection;
+use Nette\MemberAccessException;
 use Nette\SmartObject;
 use Nette\UnexpectedValueException;
 
 /**
  * Class CRUDManager which brings CRUD operations to other inherited model classes using Nette Database library.
+ * @abstract
  * @author Jindřich Máca
  */
 abstract class CRUDManager
 {
-	use SmartObject;
+	use SmartObject { __call as private call; } // Need to call it as parent method.
 
 	/** Naming pattern for classes to map on database tables. */
 	const TABLE_NAME_PATTERN = "/(?P<name>\w+)Manager$/";
@@ -35,7 +37,7 @@ abstract class CRUDManager
 	 *
 	 * @return bool Indicates if database table exists.
 	 */
-	private function tableExists()
+	private function tableExists(): bool
 	{
 		if (is_null(self::$tables)) self::$tables = $this->database->getStructure()->getTables();
 		return array_search($this->getTableName(), array_column(self::$tables, 'name')) === false ? false : true;
@@ -63,30 +65,21 @@ abstract class CRUDManager
 	 * Returns name of the database table represented by class.
 	 * @return string Table name.
 	 */
-	public final function getTableName()
-	{
-		return $this->tableName;
-	}
+	public final function getTableName(): string { return $this->tableName; }
 
 	/**
 	 * Sets name of the database table represented by class.
 	 * @param string $tableName New table name.
 	 * @return void
 	 */
-	protected function setTableName($tableName)
-	{
-		$this->tableName = strtolower($tableName);
-	}
+	protected function setTableName(string $tableName): void { $this->tableName = strtolower($tableName); }
 
 	/**
 	 * Returns Nette filtered table representation.
 	 * @return Selection Filtered table representation.
 	 * @see Selection
 	 */
-	protected final function getTable()
-	{
-		return $this->database->table($this->getTableName());
-	}
+	protected final function getTable(): Selection { return $this->database->table($this->getTableName()); }
 
 	/**
 	 * Returns Nette filtered table representation of m:n decomposition database table.
@@ -98,7 +91,7 @@ abstract class CRUDManager
 	 * @return Selection Filtered table representation.
 	 * @see Selection
 	 */
-	protected final function getTableRelation(CRUDManager $relatedTable, $relatedFirst = false, $delimiter = '_')
+	protected final function getTableRelation(CRUDManager $relatedTable, bool $relatedFirst = false, string $delimiter = '_'): Selection
 	{
 		return $relatedFirst
 			? $this->database->table($relatedTable->getTableName() . $delimiter . $this->getTableName())
@@ -108,63 +101,44 @@ abstract class CRUDManager
 	/**
 	 * Returns row specified by given primary key from database table.
 	 * @param mixed $id Primary key.
-	 * @return false|IRow Row specified by primary key or false if there is no such row.
-	 * @see IRow
-	 * @see \Nette\Database\Table\ActiveRow
+	 * @return false|ActiveRow Row specified by primary key or false if there is no such row.
+	 * @see ActiveRow
 	 */
-	public function getById($id)
-	{
-		return $this->getAll()->get($id);
-	}
+	public function getById($id) { return $this->getAll()->get($id); }
 
 	/**
 	 * Returns Nette filtered table representation.
 	 * @return Selection Filtered table representation.
 	 * @see Selection
 	 */
-	public function getAll()
-	{
-		return $this->getTable();
-	}
+	public function getAll(): Selection { return $this->getTable(); }
 
 	/**
-	 * Inserts row into the database table.
-	 *
+	 * Inserts row/s into the database table.
 	 * @param array|Selection|Traversable $record Record data to be inserted.
-	 *
-	 * @return bool|int|IRow Returns IRow or number of affected rows for Selection or table without primary key.
+	 * @return bool|int|ActiveRow Returns IRow or number of affected rows for Selection or table without primary key.
 	 *
 	 * @see Selection
 	 * @see Traversable
-	 * @see IRow
-	 * @see \Nette\Database\Table\ActiveRow
+	 * @see ActiveRow
 	 */
-	public function add($record)
-	{
-		return $this->getTable()->insert($record);
-	}
+	public function add($record) { return $this->getTable()->insert($record); }
 
 	/**
-	 * Updates row in the database table specified by given primary key.
-	 * @param mixed             $id     Primary key.
-	 * @param array|Traversable $record New record data to be updated.
+	 * Updates all rows in the database table specified by given primary key.
+	 * @param mixed    $id     Primary key.
+	 * @param iterable $record New record data to be updated.
 	 * @return int Number of affected rows.
 	 * @see Traversable
 	 */
-	public function update($id, $record)
-	{
-		return $this->getTable()->wherePrimary($id)->update($record);
-	}
+	public function update($id, iterable $record): int { return $this->getTable()->wherePrimary($id)->update($record); }
 
 	/**
 	 * Deletes all rows in the database table specified by given primary key.
 	 * @param mixed $id Primary key.
 	 * @return int Number of affected rows.
 	 */
-	public function remove($id)
-	{
-		return $this->getTable()->wherePrimary($id)->delete();
-	}
+	public function remove($id): int { return $this->getTable()->wherePrimary($id)->delete(); }
 
 	/**
 	 * Call to undefined method.
@@ -177,9 +151,9 @@ abstract class CRUDManager
 	 *
 	 * @return mixed Return value of the method.
 	 *
-	 * @throws Nette\MemberAccessException If accessing of the method fails.
+	 * @throws MemberAccessException If accessing of the method fails.
 	 */
-	public function __call($name, $arguments)
+	public function __call(string $name, array $arguments)
 	{
 		$methodName = ucfirst($this->getTableName());
 		switch ($name) {
@@ -199,7 +173,7 @@ abstract class CRUDManager
 				return $this->remove($arguments[0]);
 				break;
 			default:
-				return parent::__call($name, $arguments);
+				return $this->call($name, $arguments);
 		}
 	}
 }

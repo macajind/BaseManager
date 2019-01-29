@@ -9,6 +9,6 @@ use CRUDManager;
  * @package CRUDManager\Dummies
  * @author  Jindřich Máca
  */
-class TestManager extends CRUDManager
+final class TestManager extends CRUDManager
 {
 }
