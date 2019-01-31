@@ -1,24 +1,24 @@
 <?php
 
+use CRUDManager\ClassName;
 use CRUDManager\Inflect;
 use Nette\Database\Context;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\Table\Selection;
 use Nette\MemberAccessException;
 use Nette\SmartObject;
-use Nette\UnexpectedValueException;
 
 /**
  * Class CRUDManager which brings CRUD operations to other inherited model classes using Nette Database library.
- * @abstract
  * @author Jindřich Máca
  */
 abstract class CRUDManager
 {
 	use SmartObject { __call as private call; } // Need to call it as parent method.
+	use ClassName;
 
 	/** Naming pattern for classes to map on database tables. */
-	const TABLE_NAME_PATTERN = "/(?P<name>\w+)Manager$/";
+	const TABLE_NAME_PATTERN = '/(\w+)Manager$/';
 
 	/** @var Context Nette database context. */
 	protected $database;
@@ -48,16 +48,13 @@ abstract class CRUDManager
 	 *
 	 * @param Context $database Nette database context.
 	 *
-	 * @throws UnexpectedValueException If class name does not match the pattern for database table recognition.
+	 * @throws \UnexpectedValueException If class name does not match the pattern for database table recognition.
 	 * @throws OutOfBoundsException If database table represented by class does not exists.
 	 */
 	public function __construct(Context $database)
 	{
 		$this->database = $database;
-		$className = static::class;
-		$matches = [];
-		if (preg_match(static::TABLE_NAME_PATTERN, $className, $matches) === 1) $this->setTableName($matches['name']);
-		else throw new UnexpectedValueException("Class name '{$className}' does not match the pattern '" . self::TABLE_NAME_PATTERN . "' for database table recognition!");
+		$this->setTableName(self::getClassName(self::TABLE_NAME_PATTERN));
 		if (!$this->tableExists()) throw new OutOfBoundsException("Table with name '{$this->getTableName()}' does not exist!");
 	}
 

@@ -67,8 +67,8 @@ final class CRUDManagerTest extends MockTestCase
 	{
 		Assert::exception(
 			function () { new BaseManagerDummy($this->database); },
-			'Nette\UnexpectedValueException',
-			"Class name '" . BaseManagerDummy::class . "' does not match the pattern '" . CRUDManager::TABLE_NAME_PATTERN . "' for database table recognition!"
+			'\UnexpectedValueException',
+			"Class name '" . BaseManagerDummy::class . "' does not match the pattern '" . CRUDManager::TABLE_NAME_PATTERN . "' for its name extraction!"
 		);
 	}
 
