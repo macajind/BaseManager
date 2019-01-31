@@ -4,3 +4,6 @@ vendor/
 
 ### JetBrains template
 .idea/
+
+### Tests output
+tests/output/
